@@ -129,10 +129,13 @@
         const addBtn = document.getElementById('add-btn');
         const todoList = document.getElementById('todo-list');
 
-        function addTodo() {
-            const text = input.value.trim();
-            if (!text) return;
+        let todos = JSON.parse(localStorage.getItem('todos')) || [];
 
+        function saveTodos() {
+            localStorage.setItem('todos', JSON.stringify(todos));
+        }
+
+        function renderTodo(text) {
             const li = document.createElement('li');
             li.className = 'todo-item';
 
@@ -142,15 +145,30 @@
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'delete-btn';
             deleteBtn.textContent = 'Delete';
-            deleteBtn.addEventListener('click', () => li.remove());
+            deleteBtn.addEventListener('click', () => {
+                todos = todos.filter(t => t !== text);
+                saveTodos();
+                li.remove();
+            });
 
             li.appendChild(span);
             li.appendChild(deleteBtn);
             todoList.appendChild(li);
+        }
+
+        function addTodo() {
+            const text = input.value.trim();
+            if (!text) return;
+
+            todos.push(text);
+            saveTodos();
+            renderTodo(text);
 
             input.value = '';
             input.focus();
         }
+
+        todos.forEach(renderTodo);
 
         addBtn.addEventListener('click', addTodo);
         input.addEventListener('keydown', (e) => {
